@@ -32,7 +32,7 @@ $(BUILDDIR)/$(EFI_APP): efihello.c | $(BUILDDIR)
 
 $(BUILDDIR)/$(ESP_IMAGE): $(BUILDDIR)/$(EFI_APP) | $(BUILDDIR)
 	@echo "[BUILDING ESP IMAGE]"
-	dd if=/dev/zero of=${BUILDDIR}/${ESP_IMAGE} bs=512 count=2880
+	dd if=/dev/zero of=${BUILDDIR}/${ESP_IMAGE} bs=512 count=1440
 	mkfs.msdos -F 12 -n 'EFIBOOTISO' ${BUILDDIR}/${ESP_IMAGE}
 	mmd -i ${BUILDDIR}/${ESP_IMAGE} ::EFI
 	mmd -i ${BUILDDIR}/${ESP_IMAGE} ::EFI/BOOT
@@ -48,7 +48,7 @@ $(ISO_DIR): $(BUILDDIR)/$(BIOS_APP) $(BUILDDIR)/$(ESP_IMAGE)
 
 $(BOOT_ISO): $(ISO_DIR)
 	@echo "[BUILDING HYBRYD ISO FILE]"
-	xorriso  -as mkisofs -V "HybridBootISOSample" -o $@ -isohybrid-mbr $(HYBRID_MBR) -c boot/boot.cat -b boot/$(BIOS_APP) -no-emul-boot -boot-info-table \
+	xorriso -as mkisofs -V "HybridBootISOSample" -o $@ -isohybrid-mbr $(HYBRID_MBR) -no-pad -c boot/boot.cat -b boot/$(BIOS_APP) -no-emul-boot -boot-info-table \
 	-boot-load-size 4 -eltorito-alt-boot -e boot/$(ESP_IMAGE) -no-emul-boot -isohybrid-gpt-basdat $(ISO_DIR) --sort-weight 0 /boot --sort-weight 1 /
 	@echo "The Hybrid ISO file [$@] was created. You can burn it to CD/DVD or to the flash disk and test"
 clean:
